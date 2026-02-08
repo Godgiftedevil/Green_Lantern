@@ -1,0 +1,56 @@
+name: Green Squares Bot
+
+on:
+  schedule:
+    # Morning: 06:00 UTC (11:30 AM IST)
+    - cron: '0 6 * * *'
+    # Afternoon: 12:00 UTC (5:30 PM IST)
+    - cron: '0 12 * * *'
+    # Evening: 15:45 UTC (9:15 PM IST)
+    - cron: '45 15 * * *'
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install pytz
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "green-squares-bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Run commit script
+        run: |
+          cd green-squares-bot
+          python commit.py
+
+      - name: Pull latest changes
+        run: |
+          git pull --rebase origin ${{ github.ref_name }} || true
+
+      - name: Push changes
+        run: |
+          if [[ -n $(git status --porcelain) ]] || [[ $(git rev-list HEAD@{upstream}..HEAD --count 2>/dev/null || echo 0) -gt 0 ]]; then
+            git push origin ${{ github.ref_name }}
+            echo "✅ Changes pushed successfully"
+          else
+            echo "✅ No changes to push"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
