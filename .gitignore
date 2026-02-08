@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs and temp
+*.log
+*.tmp
+
+# Python virtual environments
+venv/
+.env/
+
+# macOS / Linux junk
+.DS_Store
+
+# GitHub Actions cache
+.github/workflows/*.log
+.github/workflows/*.bak
+
+# Bot tracking file (should not be committed)
+green-squares-bot/.commit_tracker.json
